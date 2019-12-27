@@ -7,8 +7,8 @@ public enum MetricEnum {
 	NUM_ATTRIBUTES("Number of Attributes"),
 	NUM_CLASSES("Number of Classes"),
 	NUM_FINAL_ATTRIBUTES("Number of Final Attributes"),
-	NUM_STATIC_ATTRIBUTES("Number of Static Attributes");
-
+	NUM_STATIC_ATTRIBUTES("Number of Static Attributes"),
+	NUM_ENUM("Number of Enums");
 	
 	private String designation;
 	

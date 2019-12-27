@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.lang.model.type.DeclaredType;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -19,16 +20,14 @@ import pt.iscte.pidesco.projectbrowser.model.ClassElement;
 import pt.iscte.pidesco.projectbrowser.model.PackageElement;
 import pt.iscte.pidesco.projectbrowser.model.PackageElement.Visitor;
 
-
-
-
 /* TODO
  * Number of Constructors - Done 
  * Number of Interfaces - Done 
  * Number of Methods - Done 
- * Number of Attributes
+ * Number of Attributes - Done
  * Number of Classes - Done 
  * Highest number of Parameters in a Method (?)
+ * Some modifiers.
  * Total Lines of Code
  */
 
@@ -46,7 +45,11 @@ public class MetricsService {
 		this.javaServ = javaServ;
 		fillMetricList();
 	}
-
+	
+	
+	/**
+	 * Metrics list initialization
+	 */
 	public void fillMetricList() {
 		metrics = new ArrayList<MetricModel>();
 		for(MetricEnum metricenum : MetricEnum.values()) {
@@ -54,12 +57,19 @@ public class MetricsService {
 		}
 	}
 	
+	/*
+	 * Clears the metric values.
+	 */
 	
 	public void metricsReset() {
 		for(MetricModel m : metrics) {
 			m.setMetricValue(0);
 		}
 	}
+	
+	/*
+	 * Calculation of all metrics based on a visitor pattern.
+	 */
 
 	public void CalculateMetrics() {
 		metricsReset();
@@ -90,13 +100,18 @@ public class MetricsService {
 
 	}
 
+	
 
 	public ArrayList<MetricModel> getMetricsList() {
 		return metrics;
 	}
 	
 	
-
+	
+	/*
+	 * Incrementation of a metric. Prepared to insert new metrics. Guava could help this assuming all metrics are countable.
+	 */
+	
 	public void incrementMetric(MetricEnum m) {
 		boolean incremented = false;
 		for(MetricModel metric : metrics) {
@@ -113,6 +128,9 @@ public class MetricsService {
 	}
 	
 	
+	/*
+	 * Visitor class that will describe how classes are visited.
+	 */
 
 	class MetricVisitor extends ASTVisitor{
 
@@ -138,13 +156,19 @@ public class MetricsService {
 			return super.visit(node);
 		}
 		
-		//Interfaces and Classes (Upgrade to detect enum?)
+		//Interfaces and Classes
 		@Override
 		public boolean visit(TypeDeclaration node) {
 			if(node.isInterface())
 				incrementMetric(MetricEnum.NUM_INTERFACES);
 			else
 				incrementMetric(MetricEnum.NUM_CLASSES);
+			return true;
+		}
+		
+		@Override
+		public boolean visit(EnumDeclaration node) {
+			incrementMetric(MetricEnum.NUM_ENUM);
 			return true;
 		}
 		
@@ -164,8 +188,7 @@ public class MetricsService {
 				incrementMetric(MetricEnum.NUM_FINAL_ATTRIBUTES);
 			}
 			
-			
-			
+		
 			return false;
 		}
 		
