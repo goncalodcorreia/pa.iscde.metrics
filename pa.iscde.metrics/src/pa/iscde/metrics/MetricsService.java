@@ -179,7 +179,7 @@ public class MetricsService {
 		}
 
 
-
+		//Attributes
 		public boolean visit(FieldDeclaration node) {
 			incrementMetric(classElement,MetricEnum.NUM_ATTRIBUTES);
 
