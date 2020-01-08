@@ -4,15 +4,15 @@ public class MetricModel {
 
 	private String metricName;
 	private int metricValue;
-	
-	public MetricModel(String metricName, int metricValue) {
+	private String metricType;
+
+	public MetricModel(String metricName, int metricValue, String metricType) {
 		this.metricName = metricName;
 		this.metricValue = metricValue;
+		this.metricType = metricType; 
 	}
 
-	public String getMetricName() {
-		return metricName;
-	}
+
 
 	public void setMetricName(String metricName) {
 		this.metricName = metricName;
@@ -25,13 +25,23 @@ public class MetricModel {
 	public void setMetricValue(int metricValue) {
 		this.metricValue = metricValue;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(((MetricModel)obj).metricName.equals(this.metricName))
 			return true;
 		return super.equals(obj);
 	}
+
+	public String getMetricName() {
+		return metricName;
+	}
 	
+	public String getMetricType() {
+		return metricName;
+		
+	}
 	
+
+
 }

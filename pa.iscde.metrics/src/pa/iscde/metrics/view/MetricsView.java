@@ -4,30 +4,25 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -35,14 +30,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import pa.iscde.metrics.MetricModel;
-import pa.iscde.metrics.MetricsAction;
 import pa.iscde.metrics.MetricsService;
 //import pt.iscte.pidesco.demo.extensibility.DemoAction;
 import pt.iscte.pidesco.extensibility.PidescoView;
 import pt.iscte.pidesco.javaeditor.service.JavaEditorServices;
 import pt.iscte.pidesco.projectbrowser.model.ClassElement;
-import pt.iscte.pidesco.projectbrowser.model.PackageElement;
-import pt.iscte.pidesco.projectbrowser.model.PackageElement.Visitor;
 import pt.iscte.pidesco.projectbrowser.model.SourceElement;
 import pt.iscte.pidesco.projectbrowser.service.ProjectBrowserListener;
 import pt.iscte.pidesco.projectbrowser.service.ProjectBrowserServices;
@@ -70,24 +62,21 @@ public class MetricsView implements PidescoView{
 		MetricsService metricsService = new MetricsService(projServ.getRootPackage(), javaServ);
 
 
-
 		//Articulate Some logic
 
 		Button metricLoaderBtn = new Button(viewArea, SWT.PUSH);
 
-		final Table table = new Table(viewArea,SWT.RESIZE);
-		table.setVisible(false);
+		final Table baseTable = new Table(viewArea,SWT.RESIZE);
+		baseTable.setVisible(false);
 
 
-		final Table extraTable = new Table(viewArea,SWT.None);
+		final Table extraTable = new Table(viewArea,SWT.RESIZE);
 		extraTable.setVisible(false);
 
 		HashMap<ClassElement,HashSet<MetricModel>> rowNames = metricsService.getMetricsList();
 
-		generateTable(viewArea, table, "Basic Metrics", rowNames);
-		generateTable(viewArea, extraTable, "Basic Metrics", rowNames);
-
-
+		generateTable(viewArea, baseTable, "Elementary Metrics", rowNames);
+		generateTable(viewArea, extraTable, "Aggregate Metrics", rowNames);
 
 
 
@@ -115,8 +104,9 @@ public class MetricsView implements PidescoView{
 
 			@Override
 			public void handleEvent(Event event) {
-				metricsService.CalculateMetrics();
-				updateTable(table, rowNames);
+				metricsService.traversePackagesAndClasses();
+				updateTable(baseTable, rowNames);
+				updateTable(extraTable, rowNames);
 			}
 
 
@@ -141,29 +131,25 @@ public class MetricsView implements PidescoView{
 
 		});
 
-
-		IExtensionRegistry reg = Platform.getExtensionRegistry();
-		IConfigurationElement[] elements = reg.getConfigurationElementsFor("pa.iscde.metrics");
-		for(IConfigurationElement e : elements) {
-			String name = e.getAttribute("name");
-			Button b = new Button(viewArea, SWT.PUSH);
-			b.setText(name);
-			try {
-				MetricsAction action = (MetricsAction) e.createExecutableExtension("class");
-				b.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						action.run(viewArea);
-						viewArea.layout();
-					}
-				});
-			} catch (CoreException e1) {
-				e1.printStackTrace();
+		IExtensionRegistry extRegistry = Platform.getExtensionRegistry();
+		IExtensionPoint extensionPoint = extRegistry.getExtensionPoint("pa.iscde.metrics.dummyExtension");
+		IExtension[] extensions = extensionPoint.getExtensions();
+		System.out.println(extensionPoint.isValid());
+		for(IExtension e : extensions) {
+			IConfigurationElement[] confElements = e.getConfigurationElements();
+			for(IConfigurationElement c : confElements) {
+				String s = c.getAttribute("MetricName");
+				try {
+					Object o = c.createExecutableExtension("class");
+					//System.out.println(o.getClass().);
+				} catch (CoreException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
-
 		}
-	}
 
+	}
 
 	/**
 	 * Method to generate both tables in PIDESCO's metric view
@@ -179,9 +165,8 @@ public class MetricsView implements PidescoView{
 
 
 	private void generateTable(Composite viewArea,Table table, String tableName, HashMap<ClassElement, HashSet<MetricModel>> rowNames){
-		Label label = new Label(table, SWT.TOP);
-		label.setText(tableName);
-
+		//Label label = new Label(viewArea, SWT.TOP);
+		//label.setText(tableName);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
@@ -209,11 +194,10 @@ public class MetricsView implements PidescoView{
 		if(!table.isVisible())
 			table.setVisible(true);
 
-
 		for(ClassElement cElement : rowNames.keySet()) {
 			TableItem item = new TableItem(table, SWT.NONE);
 			item.setText(0, cElement.getName());
-			
+
 			for(MetricModel m : rowNames.get(cElement)) {
 				item = new TableItem(table, SWT.NONE);
 				int c = 1;

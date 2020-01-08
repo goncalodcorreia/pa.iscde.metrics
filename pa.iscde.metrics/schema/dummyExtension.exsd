@@ -3,7 +3,7 @@
 <schema targetNamespace="pa.iscde.metrics" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="pa.iscde.metrics" id="dummyExtension" name="Dummy Extension "/>
+         <meta.schema plugin="pa.iscde.metrics" id="dummyExtension" name="Dummy Extension"/>
       </appinfo>
       <documentation>
          Test extension for the Metrics Plugin
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="item"/>
+            <element ref="metricItem"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +47,26 @@
       </complexType>
    </element>
 
-   <element name="item" type="string">
+   <element name="metricItem">
+      <complexType>
+         <attribute name="MetricName" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Name of the Metric
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":pa.iscte.metrics.extensibility.BasicMetricAPI"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
    </element>
 
    <annotation>

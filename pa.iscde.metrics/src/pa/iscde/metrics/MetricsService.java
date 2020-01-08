@@ -1,10 +1,13 @@
 package pa.iscde.metrics;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.lang.model.type.DeclaredType;
@@ -35,26 +38,12 @@ public class MetricsService {
 	public MetricsService(PackageElement root, JavaEditorServices javaServ) {
 		this.root = root;
 		this.javaServ = javaServ;
-		//fillMetricList();
 	}
 
-
-	/**
-	 * Metrics list initialization
-	 */
-
-
-
-	//	public void fillMetricList() {
-	//		metrics = new HashMap<,MetricModel>();
-	//		for(MetricEnum metricenum : MetricEnum.values()) {
-	//			metrics.add(new MetricModel(metricenum.getDesignation(),0));
-	//		}
-	//	}
-
 	/*
-	 * Clears the metric values.
+	 * Method for resetting all entries in the metric data structure
 	 */
+
 
 	public void metricsReset() {
 		for(ClassElement cmodel : metrics.keySet()) {
@@ -68,7 +57,7 @@ public class MetricsService {
 	 * Calculation of all metrics based on a visitor pattern.
 	 */
 
-	public void CalculateMetrics() {
+	public void traversePackagesAndClasses() {
 		metricsReset();
 		root.traverse(new Visitor() {
 			@Override
@@ -86,8 +75,19 @@ public class MetricsService {
 				try {
 					MetricVisitor v = new MetricVisitor(classElement);
 					File f = classElement.getFile();
+					Scanner scan = new Scanner(f);
+					int num_lines = 0;
+				
+					while(scan.hasNextLine()) {
+						num_lines++;
+						scan.nextLine();
+					}
+					
 					System.out.println("Parsing");
 					javaServ.parseFile(f, v);
+					metrics.get(classElement).add(new MetricModel("Number of Lines",num_lines,"elemental"));
+				
+					
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -99,6 +99,8 @@ public class MetricsService {
 
 
 
+
+
 	public HashMap<ClassElement, HashSet<MetricModel>> getMetricsList() {
 		return metrics;
 	}
@@ -107,14 +109,18 @@ public class MetricsService {
 	 * Incrementation of a metric. Prepared to insert new metrics. Guava could help this assuming all metrics are countable.
 	 */
 
-	public void incrementMetric(ClassElement classElement,MetricEnum m) {
+	public void performMetricCalculations(ClassElement classElement, MetricModel m) {
+		incrementMetric(classElement,m.getMetricName());
+	}
+
+	public void incrementMetric(ClassElement classElement,String metricName) {
 		System.out.println(classElement);
 		if(metrics.containsKey(classElement)){
 			HashSet<MetricModel> metricsInClassElement = metrics.get(classElement);
 
 			boolean incremented = false;
 			for(MetricModel metric : metricsInClassElement) {
-				if(metric.getMetricName().equals(m.getDesignation())) {
+				if(metric.getMetricName().equals(metricName)) {
 					metric.setMetricValue(metric.getMetricValue() + 1);
 					incremented = true;
 					break;
@@ -122,15 +128,15 @@ public class MetricsService {
 			}
 
 			if(!incremented) {
-				metrics.get(classElement).add(new MetricModel(m.getDesignation(),1));
+				metrics.get(classElement).add(new MetricModel(metricName,1,"elemental"));
 			}
 		}
 		else {
 			HashSet metricPlaceholder = new HashSet<MetricModel>();
-			metricPlaceholder.add(new MetricModel(m.getDesignation(),1));
+			metricPlaceholder.add(new MetricModel(metricName,1,"elemental"));
 			metrics.put(classElement, metricPlaceholder);
 		}
-		
+
 	}
 
 
@@ -153,11 +159,11 @@ public class MetricsService {
 			String className = classElement.getName().split("\\.")[0];
 
 			if(className.equals(node.getName().toString())) {
-				incrementMetric(classElement, MetricEnum.NUM_CONSTRUCTORS);
+				incrementMetric(classElement, "Number of Constructors");
 			}
 
 			else {
-				incrementMetric(classElement,MetricEnum.NUM_METHODS);
+				incrementMetric(classElement, "Number of Methods");
 			}
 			return super.visit(node);
 		}
@@ -166,33 +172,36 @@ public class MetricsService {
 		@Override
 		public boolean visit(TypeDeclaration node) {
 			if(node.isInterface())
-				incrementMetric(classElement,MetricEnum.NUM_INTERFACES);
+				incrementMetric(classElement,"Number of Interfaces");
 			else
-				incrementMetric(classElement,MetricEnum.NUM_CLASSES);
+				incrementMetric(classElement,"Number of Classes");
 			return true;
 		}
 
 		@Override
 		public boolean visit(EnumDeclaration node) {
-			incrementMetric(classElement,MetricEnum.NUM_ENUM);
+			incrementMetric(classElement,"Number of Enumerates");
 			return true;
 		}
 
 
 		//Attributes
 		public boolean visit(FieldDeclaration node) {
-			incrementMetric(classElement,MetricEnum.NUM_ATTRIBUTES);
+			incrementMetric(classElement,"Number of Attributes");
 
 			if(!Modifier.isPublic(node.getModifiers())) {
-				incrementMetric(classElement,MetricEnum.NUM_STATIC_ATTRIBUTES);
+				incrementMetric(classElement,"Number of Static Attributes");
 			}
 
 			if(!Modifier.isFinal(node.getModifiers())) {
-				incrementMetric(classElement,MetricEnum.NUM_FINAL_ATTRIBUTES);
+				incrementMetric(classElement,"Number of Final Attributes");
 			}
+			
 
 			return false;
 		}
+
+
 
 	}
 
