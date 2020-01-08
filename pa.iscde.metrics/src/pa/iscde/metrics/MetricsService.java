@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class MetricsService {
 	PackageElement root;
 	JavaEditorServices javaServ;
 
-	HashMap<ClassElement, HashSet<MetricModel>> metrics = new HashMap<ClassElement, HashSet<MetricModel>>(); //Table
+	Map<ClassElement, Set<MetricModel>> metrics = new HashMap<ClassElement, Set<MetricModel>>(); //Table
 
 	public MetricsService(PackageElement root, JavaEditorServices javaServ) {
 		this.root = root;
@@ -70,6 +71,7 @@ public class MetricsService {
 
 			@Override
 			public void visitClass(ClassElement classElement) {
+				
 				System.out.println("Traveling Class "  + classElement.getName());
 
 				try {
@@ -101,7 +103,7 @@ public class MetricsService {
 
 
 
-	public HashMap<ClassElement, HashSet<MetricModel>> getMetricsList() {
+	public Map<ClassElement, Set<MetricModel>> getMetricsList() {
 		return metrics;
 	}
 
@@ -116,7 +118,7 @@ public class MetricsService {
 	public void incrementMetric(ClassElement classElement,String metricName) {
 		System.out.println(classElement);
 		if(metrics.containsKey(classElement)){
-			HashSet<MetricModel> metricsInClassElement = metrics.get(classElement);
+			Set<MetricModel> metricsInClassElement = metrics.get(classElement);
 
 			boolean incremented = false;
 			for(MetricModel metric : metricsInClassElement) {

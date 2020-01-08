@@ -1,4 +1,4 @@
-package pa.iscte.metrics.extensibility;
+package pa.iscde.metrics.extensibility;
 
 import pt.iscte.pidesco.projectbrowser.model.ClassElement;
 import pt.iscte.pidesco.projectbrowser.model.PackageElement;
