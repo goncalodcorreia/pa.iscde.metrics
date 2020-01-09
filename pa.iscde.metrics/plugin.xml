@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="dummyExtension" name="Dummy Extension " schema="schema/dummyExtension.exsd"/>
+   <extension-point id="metricExtension" name="Metric Extension" schema="schema/metricExtension.exsd"/>
    <extension
          id="view"
          name="Metrics Table"

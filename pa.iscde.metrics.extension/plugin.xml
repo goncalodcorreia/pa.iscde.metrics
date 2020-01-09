@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="pa.iscde.metrics.dummyExtension">
+         point="pa.iscde.metrics.metricExtension">
       <metricItem
             MetricName="metricExample"
             class="pa.iscde.metrics.extension.ExtraMetricsTest">

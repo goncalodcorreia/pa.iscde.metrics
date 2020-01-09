@@ -9,6 +9,8 @@ public interface AggregateMetricAPI {
 	
 	
 		public float getAggregatePackageMetric(PackageElement packageElement, MetricServiceAPI api);
+		
+		
 
 	
 }

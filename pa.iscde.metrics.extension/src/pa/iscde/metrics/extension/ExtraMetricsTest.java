@@ -14,8 +14,11 @@ import pt.iscte.pidesco.projectbrowser.model.PackageElement;
 import pt.iscte.pidesco.projectbrowser.model.SourceElement;
 
 
-
-public class ExtraMetricsTest implements BasicMetricAPI, AggregateMetricAPI{
+/*
+ * 
+ * Example class that adapts all the exposed APIs. 
+ */
+public class ExtraMetricsTest implements BasicMetricAPI, AggregateMetricAPI, MetricServiceAPI{
 
 	@Override
 	public Set<MetricModel> getClassMetric(ClassElement classElement) {
@@ -39,6 +42,11 @@ public class ExtraMetricsTest implements BasicMetricAPI, AggregateMetricAPI{
 			}
 		}
 		return totalLines;
+	}
+
+	@Override
+	public float getMetric(String metricName, ClassElement classElement) {
+		return 20;
 	}
 
 

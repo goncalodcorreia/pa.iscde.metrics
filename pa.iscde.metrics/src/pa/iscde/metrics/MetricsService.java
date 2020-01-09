@@ -31,18 +31,20 @@ import pt.iscte.pidesco.projectbrowser.model.SourceElement;
  */
 
 public class MetricsService {
-
+	
+	private final static MetricsService INSTANCE = new MetricsService();
+	
 	PackageElement root;
 	JavaEditorServices javaServ;
 
 	Map<SourceElement, Set<MetricModel>> metrics = new HashMap<SourceElement, Set<MetricModel>>(); //Table
 	List<PackageElement> packages = new ArrayList<PackageElement>();
 
-	public MetricsService(PackageElement root, JavaEditorServices javaServ) {
-		this.root = root;
-		this.javaServ = javaServ;
-	}
-
+	//public MetricsService(PackageElement root, JavaEditorServices javaServ) {
+		//this.root = root;
+		//this.javaServ = javaServ;
+	//}
+	
 	/*
 	 * Method for resetting all entries in the metric data structure
 	 */
@@ -108,12 +110,10 @@ public class MetricsService {
 	}
 
 
-
-
-
 	public Map<SourceElement, Set<MetricModel>> getMetricStructure() {
 		return metrics;
 	}
+	
 	
 	public List<PackageElement >getPackages() {
 		return packages;
@@ -216,6 +216,15 @@ public class MetricsService {
 
 
 
+	}
+	
+	public static MetricsService getService() {
+		return INSTANCE;
+	}
+
+	public void setupServices(PackageElement rootPackage, JavaEditorServices javaServ) {
+		this.root = rootPackage;
+		this.javaServ = javaServ;	
 	}
 
 

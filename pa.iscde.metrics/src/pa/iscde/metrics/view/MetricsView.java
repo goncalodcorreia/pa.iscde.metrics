@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +45,6 @@ import pt.iscte.pidesco.projectbrowser.model.SourceElement;
 import pt.iscte.pidesco.projectbrowser.service.ProjectBrowserListener;
 import pt.iscte.pidesco.projectbrowser.service.ProjectBrowserServices;
 
-import pa.iscde.metrics.extensibility.BasicMetricAPI;
 
 
 public class MetricsView implements PidescoView{
@@ -69,7 +67,11 @@ public class MetricsView implements PidescoView{
 
 		JavaEditorServices javaServ = context.getService(serviceReference2);
 
-		MetricsService metricsService = new MetricsService(projServ.getRootPackage(), javaServ);
+		MetricsService metricsService = MetricsService.getService();
+		
+		metricsService.setupServices(projServ.getRootPackage(), javaServ);
+		
+		
 		MetricServiceAPI metricServiceapi = new MetricServiceImpl();
 
 
@@ -166,7 +168,7 @@ public class MetricsView implements PidescoView{
 
 
 		IExtensionRegistry extRegistry = Platform.getExtensionRegistry();
-		IExtensionPoint extensionPoint = extRegistry.getExtensionPoint("pa.iscde.metrics.dummyExtension");
+		IExtensionPoint extensionPoint = extRegistry.getExtensionPoint("pa.iscde.metrics.metricExtension");
 		IExtension[] extensions = extensionPoint.getExtensions(); //1 
 		for(IExtension e : extensions) {
 			IConfigurationElement[] confElements = e.getConfigurationElements();
