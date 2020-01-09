@@ -11,8 +11,9 @@ import pt.iscte.pidesco.projectbrowser.model.PackageElement;
 import pt.iscte.pidesco.projectbrowser.model.SourceElement;
 
 public interface BasicMetricAPI {
-
-	public Set<MetricModel> getClassMetric(SourceElement classElement);
+	
+	
+	public Set<MetricModel> getClassMetric(ClassElement classElement);
 	
 	public Set<MetricModel> getPackageMetric(PackageElement packageElement);
 

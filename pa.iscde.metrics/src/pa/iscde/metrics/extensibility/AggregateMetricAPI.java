@@ -8,7 +8,7 @@ import pt.iscte.pidesco.projectbrowser.model.PackageElement;
 public interface AggregateMetricAPI {
 	
 	
-	public float getAggregatePackageMetric(PackageElement packageElement, MetricServiceAPI api);
+		public float getAggregatePackageMetric(PackageElement packageElement, MetricServiceAPI api);
 
 	
 }

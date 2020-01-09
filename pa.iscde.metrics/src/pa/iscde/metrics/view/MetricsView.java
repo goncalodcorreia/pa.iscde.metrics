@@ -118,7 +118,7 @@ public class MetricsView implements PidescoView{
 				for(SourceElement sourceElement : baseRowNames.keySet()) {
 					if(sourceElement.isClass()) {
 						for(BasicMetricAPI extra : extraMetrics) {
-							extraRowNames.put(sourceElement, extra.getClassMetric(sourceElement));
+							extraRowNames.put(sourceElement, extra.getClassMetric((ClassElement) sourceElement));
 						}
 					}
 
