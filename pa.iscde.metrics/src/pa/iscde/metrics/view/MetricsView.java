@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,10 +34,14 @@ import org.osgi.framework.ServiceReference;
 
 import pa.iscde.metrics.MetricModel;
 import pa.iscde.metrics.MetricsService;
+import pa.iscde.metrics.extensibility.AggregateMetricAPI;
 import pa.iscde.metrics.extensibility.BasicMetricAPI;
+import pa.iscde.metrics.extensibility.MetricServiceAPI;
+import pa.iscde.metrics.extensibility.MetricServiceImpl;
 import pt.iscte.pidesco.extensibility.PidescoView;
 import pt.iscte.pidesco.javaeditor.service.JavaEditorServices;
 import pt.iscte.pidesco.projectbrowser.model.ClassElement;
+import pt.iscte.pidesco.projectbrowser.model.PackageElement;
 import pt.iscte.pidesco.projectbrowser.model.SourceElement;
 import pt.iscte.pidesco.projectbrowser.service.ProjectBrowserListener;
 import pt.iscte.pidesco.projectbrowser.service.ProjectBrowserServices;
@@ -65,6 +70,7 @@ public class MetricsView implements PidescoView{
 		JavaEditorServices javaServ = context.getService(serviceReference2);
 
 		MetricsService metricsService = new MetricsService(projServ.getRootPackage(), javaServ);
+		MetricServiceAPI metricServiceapi = new MetricServiceImpl();
 
 
 		//Articulate Some logic
@@ -80,11 +86,13 @@ public class MetricsView implements PidescoView{
 
 		//Basic Metrics
 
-		Map<ClassElement,Set<MetricModel>> baseRowNames = metricsService.getMetricsList();
+		Map<SourceElement,Set<MetricModel>> baseRowNames = metricsService.getMetricStructure();
 
-		Map<ClassElement,Set<MetricModel>> extraRowNames = new HashMap<ClassElement,Set<MetricModel>>();
+		Map<SourceElement,Set<MetricModel>> extraRowNames = new HashMap<SourceElement,Set<MetricModel>>();
 
 		ArrayList<BasicMetricAPI> extraMetrics = new ArrayList<BasicMetricAPI>();
+		ArrayList<AggregateMetricAPI> extraAggregateMetrics = new ArrayList<AggregateMetricAPI>();
+		List<PackageElement> packages = metricsService.getPackages();
 
 		generateTable(viewArea, baseTable, "Elementary Metrics", baseRowNames);
 		generateTable(viewArea, extraTable, "Aggregate Metrics", extraRowNames);
@@ -107,10 +115,29 @@ public class MetricsView implements PidescoView{
 			@Override
 			public void handleEvent(Event event) {
 				metricsService.traversePackagesAndClasses();
-				for(ClassElement classElement : baseRowNames.keySet()) {
-					for(BasicMetricAPI extra : extraMetrics) {
-						extraRowNames.put(classElement, extra.getClassMetric(classElement));
+				for(SourceElement sourceElement : baseRowNames.keySet()) {
+					if(sourceElement.isClass()) {
+						for(BasicMetricAPI extra : extraMetrics) {
+							extraRowNames.put(sourceElement, extra.getClassMetric(sourceElement));
+						}
 					}
+
+
+					updateTable(baseTable, baseRowNames);
+					updateTable(extraTable, extraRowNames);
+				}
+
+				for(PackageElement packageElement : packages) {
+					Set<MetricModel> metrics = new HashSet<MetricModel>();
+					for(AggregateMetricAPI extra : extraAggregateMetrics) {
+
+						MetricModel m = new MetricModel("Test Aggregate Lines",
+								(int)extra.getAggregatePackageMetric(packageElement,metricServiceapi),"aggregate");
+
+						metrics.add(m);
+					}
+					extraRowNames.put(packageElement, metrics);
+
 					updateTable(baseTable, baseRowNames);
 					updateTable(extraTable, extraRowNames);
 				}
@@ -147,8 +174,14 @@ public class MetricsView implements PidescoView{
 				String s = c.getAttribute("MetricName"); //nome
 				try {
 					Object o = c.createExecutableExtension("class");
+
 					BasicMetricAPI on = (BasicMetricAPI)o;
+					AggregateMetricAPI oa = (AggregateMetricAPI)o;
+
+
 					extraMetrics.add(on);
+					extraAggregateMetrics.add(oa);
+
 					System.out.println("added Metrics");
 				} catch (CoreException e1) {
 					// TODO Auto-generated catch block
@@ -176,7 +209,7 @@ public class MetricsView implements PidescoView{
 	 */
 
 
-	private void generateTable(Composite viewArea,Table table, String tableName, Map<ClassElement, Set<MetricModel>> rowNames){
+	private void generateTable(Composite viewArea,Table table, String tableName, Map<SourceElement, Set<MetricModel>> rowNames){
 		//Label label = new Label(viewArea, SWT.TOP);
 		//label.setText(tableName);
 		table.setHeaderVisible(true);
@@ -200,13 +233,13 @@ public class MetricsView implements PidescoView{
 	}
 
 
-	private void updateTable(Table table, Map<ClassElement, Set<MetricModel>> rowNames) {
+	private void updateTable(Table table, Map<SourceElement, Set<MetricModel>> rowNames) {
 		table.removeAll();
 
 		if(!table.isVisible())
 			table.setVisible(true);
 
-		for(ClassElement cElement : rowNames.keySet()) {
+		for(SourceElement cElement : rowNames.keySet()) {
 			TableItem item = new TableItem(table, SWT.NONE);
 			item.setText(0, cElement.getName());
 

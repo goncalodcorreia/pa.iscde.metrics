@@ -24,6 +24,7 @@ import pt.iscte.pidesco.javaeditor.service.JavaEditorServices;
 import pt.iscte.pidesco.projectbrowser.model.ClassElement;
 import pt.iscte.pidesco.projectbrowser.model.PackageElement;
 import pt.iscte.pidesco.projectbrowser.model.PackageElement.Visitor;
+import pt.iscte.pidesco.projectbrowser.model.SourceElement;
 
 /* TODO
  * Questions :
@@ -34,7 +35,8 @@ public class MetricsService {
 	PackageElement root;
 	JavaEditorServices javaServ;
 
-	Map<ClassElement, Set<MetricModel>> metrics = new HashMap<ClassElement, Set<MetricModel>>(); //Table
+	Map<SourceElement, Set<MetricModel>> metrics = new HashMap<SourceElement, Set<MetricModel>>(); //Table
+	List<PackageElement> packages = new ArrayList<PackageElement>();
 
 	public MetricsService(PackageElement root, JavaEditorServices javaServ) {
 		this.root = root;
@@ -47,7 +49,7 @@ public class MetricsService {
 
 
 	public void metricsReset() {
-		for(ClassElement cmodel : metrics.keySet()) {
+		for(SourceElement cmodel : metrics.keySet()) {
 			for(MetricModel m : metrics.get(cmodel)) {
 				if(m.getMetricName() != "Number of Lines")
 					m.setMetricValue(0);
@@ -66,6 +68,7 @@ public class MetricsService {
 			public boolean visitPackage(PackageElement packageElement) {
 				// TODO Auto-generated method stub
 				System.out.println("Traveling Package "  + packageElement.getName());
+				packages.add(packageElement);
 				return true;
 			}
 
@@ -108,8 +111,12 @@ public class MetricsService {
 
 
 
-	public Map<ClassElement, Set<MetricModel>> getMetricsList() {
+	public Map<SourceElement, Set<MetricModel>> getMetricStructure() {
 		return metrics;
+	}
+	
+	public List<PackageElement >getPackages() {
+		return packages;
 	}
 
 	/*

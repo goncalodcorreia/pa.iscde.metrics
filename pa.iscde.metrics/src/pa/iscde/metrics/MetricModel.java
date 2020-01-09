@@ -50,6 +50,10 @@ public class MetricModel {
 		
 	}
 	
+	public String toString() {
+		return metricName +  " --- " + metricValue + " --- " + metricType;
+	}
+	
 
 
 }
