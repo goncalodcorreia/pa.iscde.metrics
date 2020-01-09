@@ -49,7 +49,8 @@ public class MetricsService {
 	public void metricsReset() {
 		for(ClassElement cmodel : metrics.keySet()) {
 			for(MetricModel m : metrics.get(cmodel)) {
-				m.setMetricValue(0);
+				if(m.getMetricName() != "Number of Lines")
+					m.setMetricValue(0);
 			}
 		}
 	}
@@ -71,7 +72,7 @@ public class MetricsService {
 
 			@Override
 			public void visitClass(ClassElement classElement) {
-				
+
 				System.out.println("Traveling Class "  + classElement.getName());
 
 				try {
@@ -79,17 +80,21 @@ public class MetricsService {
 					File f = classElement.getFile();
 					Scanner scan = new Scanner(f);
 					int num_lines = 0;
-				
+
 					while(scan.hasNextLine()) {
 						num_lines++;
 						scan.nextLine();
 					}
-					
-					System.out.println("Parsing");
+
 					javaServ.parseFile(f, v);
-					metrics.get(classElement).add(new MetricModel("Number of Lines",num_lines,"elemental"));
-				
-					
+
+					MetricModel modelToAdd = new MetricModel("Number of Lines",num_lines,"elemental");
+					if(!metrics.get(classElement).contains(modelToAdd)) {
+						metrics.get(classElement).add(modelToAdd);
+					}
+
+					scan.close();
+
 				}catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -116,7 +121,6 @@ public class MetricsService {
 	}
 
 	public void incrementMetric(ClassElement classElement,String metricName) {
-		System.out.println(classElement);
 		if(metrics.containsKey(classElement)){
 			Set<MetricModel> metricsInClassElement = metrics.get(classElement);
 
@@ -198,7 +202,7 @@ public class MetricsService {
 			if(!Modifier.isFinal(node.getModifiers())) {
 				incrementMetric(classElement,"Number of Final Attributes");
 			}
-			
+
 
 			return false;
 		}

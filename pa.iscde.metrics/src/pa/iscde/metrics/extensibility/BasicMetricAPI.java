@@ -13,6 +13,6 @@ public interface BasicMetricAPI {
 
 	public Set<MetricModel> getClassMetric(ClassElement classElement);
 	
-	public Map<ClassElement,Set<MetricModel>> getPackageMetric(PackageElement packageElement);
+	public Set<MetricModel> getPackageMetric(PackageElement packageElement);
 
 }

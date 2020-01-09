@@ -28,10 +28,18 @@ public class MetricModel {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(((MetricModel)obj).metricName.equals(this.metricName))
+		if(((MetricModel)obj).metricName.equals(this.metricName) && ((MetricModel)obj).metricValue ==(this.metricValue))
 			return true;
 		return super.equals(obj);
 	}
+	
+	
+	@Override
+	public int hashCode() {
+	    return (int) 237 * metricName.hashCode();
+	}
+	
+	
 
 	public String getMetricName() {
 		return metricName;
