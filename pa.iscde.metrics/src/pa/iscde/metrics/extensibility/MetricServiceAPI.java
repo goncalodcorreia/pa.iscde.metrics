@@ -7,7 +7,6 @@ public interface MetricServiceAPI {
 
 	public float getMetric(String metricName, ClassElement classElement);
 	
-	public float getMetric(String metricName, ClassElement classElement);
 	
 	
 }
